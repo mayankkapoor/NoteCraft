@@ -18,7 +18,7 @@ export function useNotes() {
   });
 
   const createNote = useMutation({
-    mutationFn: async (note: Partial<InsertNote>) => {
+    mutationFn: async (note: Omit<InsertNote, 'id' | 'createdAt' | 'updatedAt'>) => {
       const response = await fetch('/api/notes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
