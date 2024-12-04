@@ -72,6 +72,7 @@ export function registerRoutes(app: Express) {
         .set({
           title: req.body.title,
           content: req.body.content,
+          tags: req.body.tags,
           updatedAt: new Date()
         })
         .where(eq(notes.id, noteId))

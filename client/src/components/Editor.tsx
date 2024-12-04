@@ -1,7 +1,7 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Button } from "@/components/ui/button";
-import { Bold, Italic, List, ListOrdered, Save } from 'lucide-react';
+import { Bold, Italic, List, ListOrdered, Save, Tag } from 'lucide-react';
 import { useNotes } from '../hooks/use-notes';
 import { type Note } from '@db/schema';
 import { useEffect, useState } from 'react';
@@ -13,6 +13,8 @@ interface EditorProps {
 export function Editor({ note }: EditorProps) {
   const { updateNote } = useNotes();
   const [localTitle, setLocalTitle] = useState(note?.title || '');
+  const [localTags, setLocalTags] = useState<string[]>(note?.tags || []);
+  const [newTag, setNewTag] = useState('');
   
   const editor = useEditor({
     extensions: [StarterKit],
@@ -28,7 +30,8 @@ export function Editor({ note }: EditorProps) {
         updateNote.mutate({
           ...note,
           content,
-          title: note.title
+          title: localTitle,
+          tags: localTags
         });
       }
     }
@@ -38,6 +41,7 @@ export function Editor({ note }: EditorProps) {
     if (editor && note) {
       editor.commands.setContent(JSON.parse(JSON.stringify(note.content)));
       setLocalTitle(note.title);
+      setLocalTags(note.tags || []);
     }
   }, [note, editor]);
 
@@ -48,6 +52,31 @@ export function Editor({ note }: EditorProps) {
       </div>
     );
   }
+
+  const handleAddTag = () => {
+    if (newTag && !localTags.includes(newTag)) {
+      const updatedTags = [...localTags, newTag];
+      setLocalTags(updatedTags);
+      setNewTag('');
+      updateNote.mutate({
+        ...note,
+        tags: updatedTags,
+        title: localTitle,
+        content: editor?.getJSON() || note.content
+      });
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    const updatedTags = localTags.filter(tag => tag !== tagToRemove);
+    setLocalTags(updatedTags);
+    updateNote.mutate({
+      ...note,
+      tags: updatedTags,
+      title: localTitle,
+      content: editor?.getJSON() || note.content
+    });
+  };
 
   return (
     <div className="h-full flex flex-col bg-[#fafaf9]">
@@ -67,7 +96,8 @@ export function Editor({ note }: EditorProps) {
               updateNote.mutate({
                 ...note,
                 title: localTitle,
-                content: editor?.getJSON() || note.content
+                content: editor?.getJSON() || note.content,
+                tags: localTags
               });
             }
           }}
@@ -110,6 +140,43 @@ export function Editor({ note }: EditorProps) {
         >
           <ListOrdered className="h-4 w-4" />
         </Button>
+      </div>
+      <div className="border-b p-2">
+        <div className="flex gap-2 mb-2">
+          {localTags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-secondary"
+            >
+              {tag}
+              <button
+                onClick={() => handleRemoveTag(tag)}
+                className="ml-1 hover:text-destructive"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newTag}
+            onChange={(e) => setNewTag(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
+            placeholder="Add a tag..."
+            className="flex-1 px-2 py-1 text-sm border rounded"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleAddTag}
+            disabled={!newTag}
+          >
+            <Tag className="h-4 w-4 mr-2" />
+            Add Tag
+          </Button>
+        </div>
       </div>
       <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
     </div>
