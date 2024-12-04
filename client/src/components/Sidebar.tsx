@@ -13,7 +13,7 @@ export function Sidebar() {
       title: "Untitled Note",
       content: "",
       userId: user!.id,
-      tags: []
+      tags: [] as string[]
     });
   };
 
