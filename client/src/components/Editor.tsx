@@ -22,10 +22,12 @@ export function Editor({ note }: EditorProps) {
       }
     },
     onUpdate: ({ editor }) => {
-      if (note) {
+      if (note && !updateNote.isPending) {
+        const content = editor.getJSON();
         updateNote.mutate({
           ...note,
-          content: editor.getJSON()
+          content,
+          title: note.title
         });
       }
     }
@@ -52,10 +54,20 @@ export function Editor({ note }: EditorProps) {
           type="text"
           value={note.title}
           onChange={(e) => {
-            if (note) {
+            if (note && !updateNote.isPending) {
               updateNote.mutate({
                 ...note,
-                title: e.target.value
+                title: e.target.value,
+                content: editor?.getJSON() || note.content
+              });
+            }
+          }}
+          onBlur={(e) => {
+            if (note && !updateNote.isPending) {
+              updateNote.mutate({
+                ...note,
+                title: e.target.value,
+                content: editor?.getJSON() || note.content
               });
             }
           }}

@@ -47,12 +47,39 @@ export function registerRoutes(app: Express) {
     }
 
     try {
+      // Ensure we have a valid note ID
+      const noteId = parseInt(req.params.id);
+      if (isNaN(noteId)) {
+        return res.status(400).send("Invalid note ID");
+      }
+
+      // Get the existing note to ensure it exists and belongs to the user
+      const [existingNote] = await db.select()
+        .from(notes)
+        .where(eq(notes.id, noteId))
+        .limit(1);
+
+      if (!existingNote) {
+        return res.status(404).send("Note not found");
+      }
+
+      if (existingNote.userId !== req.user!.id) {
+        return res.status(403).send("Not authorized to update this note");
+      }
+
+      // Update the note with the new data
       const [updatedNote] = await db.update(notes)
-        .set({ ...req.body, updatedAt: new Date() })
-        .where(eq(notes.id, parseInt(req.params.id)))
+        .set({
+          title: req.body.title,
+          content: req.body.content,
+          updatedAt: new Date()
+        })
+        .where(eq(notes.id, noteId))
         .returning();
+
       res.json(updatedNote);
     } catch (error) {
+      console.error('Error updating note:', error);
       res.status(500).send("Failed to update note");
     }
   });
