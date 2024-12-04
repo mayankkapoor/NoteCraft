@@ -34,9 +34,14 @@ export function NotesList({ notes, isLoading, selectedNote, onSelectNote }: Note
             onClick={() => onSelectNote(note)}
           >
             <h3 className="font-medium mb-2">{note.title}</h3>
-            <p className="text-sm text-muted-foreground">
-              {format(new Date(note.updatedAt), 'MMM dd, yyyy')}
-            </p>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">
+                Last updated: {format(new Date(note.updatedAt), 'MMM dd, yyyy HH:mm')}
+              </p>
+              <p className="text-xs text-muted-foreground/75">
+                Created: {format(new Date(note.createdAt), 'MMM dd, yyyy HH:mm')}
+              </p>
+            </div>
             {Array.isArray(note.tags) && note.tags.length > 0 && (
               <div className="flex gap-2 mt-2">
                 {note.tags.map((tag: string) => (
