@@ -47,6 +47,22 @@ export function Editor({ note }: EditorProps) {
 
   return (
     <div className="h-full flex flex-col bg-[#fafaf9]">
+      <div className="border-b p-4">
+        <input
+          type="text"
+          value={note.title}
+          onChange={(e) => {
+            if (note) {
+              updateNote.mutate({
+                ...note,
+                title: e.target.value
+              });
+            }
+          }}
+          className="w-full text-2xl font-semibold bg-transparent border-none focus:outline-none mb-2"
+          placeholder="Untitled Note"
+        />
+      </div>
       <div className="border-b p-2 flex gap-2">
         <Button
           variant="ghost"
