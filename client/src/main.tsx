@@ -21,7 +21,7 @@ function Router() {
     );
   }
 
-  if (!user) {
+  if (!user || error) {  // Add error check
     return <AuthPage />;
   }
 
