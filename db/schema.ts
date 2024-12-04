@@ -23,8 +23,7 @@ export const selectUserSchema = createSelectSchema(users);
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = z.infer<typeof selectUserSchema>;
 
-export const insertNoteSchema = createInsertSchema(notes);
-export const insertNoteWithTagsSchema = insertNoteSchema.extend({
+export const insertNoteSchema = createInsertSchema(notes, {
   tags: z.array(z.string()).default([])
 });
 export const selectNoteSchema = createSelectSchema(notes);
