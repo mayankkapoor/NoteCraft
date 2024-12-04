@@ -96,5 +96,7 @@ export function useUser() {
     login: loginMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,
     register: registerMutation.mutateAsync,
+    isLoggingIn: loginMutation.isPending,
+    isRegistering: registerMutation.isPending
   };
 }
