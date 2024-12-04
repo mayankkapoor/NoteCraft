@@ -1,10 +1,10 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Button } from "@/components/ui/button";
-import { Bold, Italic, List, ListOrdered } from 'lucide-react';
+import { Bold, Italic, List, ListOrdered, Save } from 'lucide-react';
 import { useNotes } from '../hooks/use-notes';
 import { type Note } from '@db/schema';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface EditorProps {
   note: Note | null;
@@ -12,6 +12,7 @@ interface EditorProps {
 
 export function Editor({ note }: EditorProps) {
   const { updateNote } = useNotes();
+  const [localTitle, setLocalTitle] = useState(note?.title || '');
   
   const editor = useEditor({
     extensions: [StarterKit],
@@ -36,6 +37,7 @@ export function Editor({ note }: EditorProps) {
   useEffect(() => {
     if (editor && note) {
       editor.commands.setContent(JSON.parse(JSON.stringify(note.content)));
+      setLocalTitle(note.title);
     }
   }, [note, editor]);
 
@@ -49,31 +51,31 @@ export function Editor({ note }: EditorProps) {
 
   return (
     <div className="h-full flex flex-col bg-[#fafaf9]">
-      <div className="border-b p-4">
+      <div className="border-b p-4 flex items-center gap-2">
         <input
           type="text"
-          value={note.title}
-          onChange={(e) => {
-            if (note && !updateNote.isPending) {
-              updateNote.mutate({
-                ...note,
-                title: e.target.value,
-                content: editor?.getJSON() || note.content
-              });
-            }
-          }}
-          onBlur={(e) => {
-            if (note && !updateNote.isPending) {
-              updateNote.mutate({
-                ...note,
-                title: e.target.value,
-                content: editor?.getJSON() || note.content
-              });
-            }
-          }}
-          className="w-full text-2xl font-semibold bg-transparent border-none focus:outline-none mb-2"
+          value={localTitle}
+          onChange={(e) => setLocalTitle(e.target.value)}
+          className="flex-1 text-2xl font-semibold bg-transparent border-none focus:outline-none"
           placeholder="Untitled Note"
         />
+        <Button 
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            if (note && !updateNote.isPending) {
+              updateNote.mutate({
+                ...note,
+                title: localTitle,
+                content: editor?.getJSON() || note.content
+              });
+            }
+          }}
+          disabled={updateNote.isPending}
+        >
+          <Save className="h-4 w-4 mr-2" />
+          Save
+        </Button>
       </div>
       <div className="border-b p-2 flex gap-2">
         <Button
