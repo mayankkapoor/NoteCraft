@@ -15,7 +15,7 @@ export const notes = pgTable("notes", {
   userId: integer("user_id").references(() => users.id).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  tags: text("tags").array(),
+  tags: text("tags").array().notNull().default([]),
 });
 
 export const insertUserSchema = createInsertSchema(users);

@@ -37,9 +37,9 @@ export function NotesList({ notes, isLoading, selectedNote, onSelectNote }: Note
             <p className="text-sm text-muted-foreground">
               {format(new Date(note.updatedAt), 'MMM dd, yyyy')}
             </p>
-            {note.tags && note.tags.length > 0 && (
+            {Array.isArray(note.tags) && note.tags.length > 0 && (
               <div className="flex gap-2 mt-2">
-                {note.tags.map((tag) => (
+                {note.tags.map((tag: string) => (
                   <span key={tag} className="text-xs bg-secondary px-2 py-1 rounded">
                     {tag}
                   </span>
