@@ -13,7 +13,7 @@ interface EditorProps {
 export function Editor({ note }: EditorProps) {
   const { updateNote } = useNotes();
   const [localTitle, setLocalTitle] = useState(note?.title || '');
-  const [localTags, setLocalTags] = useState<string[]>(note?.tags || []);
+  const [localTags, setLocalTags] = useState<string[]>(note?.tags ?? []);
   const [newTag, setNewTag] = useState('');
   
   const editor = useEditor({
@@ -41,7 +41,7 @@ export function Editor({ note }: EditorProps) {
     if (editor && note) {
       editor.commands.setContent(JSON.parse(JSON.stringify(note.content)));
       setLocalTitle(note.title);
-      setLocalTags(note.tags || []);
+      setLocalTags(Array.isArray(note.tags) ? note.tags : []);
     }
   }, [note, editor]);
 
