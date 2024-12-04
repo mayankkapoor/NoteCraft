@@ -1,13 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Note, InsertNote } from "@db/schema";
 import { useToast } from '@/hooks/use-toast';
+import { useUser } from './use-user';
 
 export function useNotes() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { user } = useUser();
 
   const { data: notes, isLoading, error } = useQuery<Note[]>({
-    queryKey: ['notes'],
+    queryKey: ['notes', user?.id],
     queryFn: async () => {
       const response = await fetch('/api/notes', {
         credentials: 'include'  // Include credentials for authentication
