@@ -24,6 +24,9 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = z.infer<typeof selectUserSchema>;
 
 export const insertNoteSchema = createInsertSchema(notes);
+export const insertNoteWithTagsSchema = insertNoteSchema.extend({
+  tags: z.array(z.string()).default([])
+});
 export const selectNoteSchema = createSelectSchema(notes);
 export type InsertNote = z.infer<typeof insertNoteSchema>;
 export type Note = z.infer<typeof selectNoteSchema>;
