@@ -12,7 +12,7 @@ interface EditorProps {
 
 export function Editor({ note }: EditorProps) {
   const { updateNote } = useNotes();
-  const [localTitle, setLocalTitle] = useState(note?.title || '');
+  const [localTitle, setLocalTitle] = useState(note?.title ?? '');
   const [localTags, setLocalTags] = useState<string[]>(note?.tags ?? []);
   const [newTag, setNewTag] = useState('');
   
@@ -41,7 +41,7 @@ export function Editor({ note }: EditorProps) {
     if (editor && note) {
       editor.commands.setContent(JSON.parse(JSON.stringify(note.content)));
       setLocalTitle(note.title);
-      setLocalTags(Array.isArray(note.tags) ? note.tags : []);
+      setLocalTags(note.tags ?? []);
     }
   }, [note, editor]);
 
@@ -58,11 +58,12 @@ export function Editor({ note }: EditorProps) {
       const updatedTags = [...localTags, newTag];
       setLocalTags(updatedTags);
       setNewTag('');
+      
       updateNote.mutate({
         ...note,
         tags: updatedTags,
         title: localTitle,
-        content: editor?.getJSON() || note.content
+        content: editor?.getJSON() ?? note.content
       });
     }
   };
@@ -70,11 +71,12 @@ export function Editor({ note }: EditorProps) {
   const handleRemoveTag = (tagToRemove: string) => {
     const updatedTags = localTags.filter(tag => tag !== tagToRemove);
     setLocalTags(updatedTags);
+    
     updateNote.mutate({
       ...note,
       tags: updatedTags,
       title: localTitle,
-      content: editor?.getJSON() || note.content
+      content: editor?.getJSON() ?? note.content
     });
   };
 
@@ -96,7 +98,7 @@ export function Editor({ note }: EditorProps) {
               updateNote.mutate({
                 ...note,
                 title: localTitle,
-                content: editor?.getJSON() || note.content,
+                content: editor?.getJSON() ?? note.content,
                 tags: localTags
               });
             }
