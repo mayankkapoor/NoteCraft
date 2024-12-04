@@ -1,8 +1,13 @@
+import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic } from "./vite";
 import { createServer } from "http";
 
+/**
+ * Formats and logs messages with timestamp in a consistent format
+ * @param message - The message to log
+ */
 function log(message: string) {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour: "2-digit",
@@ -14,21 +19,32 @@ function log(message: string) {
   console.log(`${formattedTime} [express] ${message}`);
 }
 
+// Initialize Express application
 const app = express();
+
+// Middleware setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+/**
+ * Request logging middleware
+ * - Captures request start time
+ * - Intercepts JSON responses
+ * - Logs API requests with duration and response data
+ */
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
+  // Intercept json responses to capture response body
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
     capturedJsonResponse = bodyJson;
     return originalResJson.apply(res, [bodyJson, ...args]);
   };
 
+  // Log request details on response finish
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
@@ -37,6 +53,7 @@ app.use((req, res, next) => {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
 
+      // Truncate long log lines
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "…";
       }
@@ -48,10 +65,13 @@ app.use((req, res, next) => {
   next();
 });
 
+// Self-executing async function to setup and start the server
 (async () => {
+  // Register API routes
   registerRoutes(app);
   const server = createServer(app);
 
+  // Global error handler
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -60,18 +80,15 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
+  // Setup Vite for development or serve static files for production
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client
-  const PORT = 5000;
+  // Start server
+  const PORT = parseInt(process.env.PORT || '5000', 10);
   server.listen(PORT, "0.0.0.0", () => {
     log(`serving on port ${PORT}`);
   });
