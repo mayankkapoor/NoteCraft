@@ -34,6 +34,8 @@ export default function AuthPage() {
     const result = await register(data);
     if (!result.ok) {
       toast({ title: "Error", description: result.message, variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: "Registration successful! You're now logged in." });
     }
   };
 
