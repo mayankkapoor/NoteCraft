@@ -6,10 +6,15 @@ export function useNotes() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: notes, isLoading } = useQuery<Note[]>({
+  const { data: notes, isLoading, error } = useQuery<Note[]>({
     queryKey: ['notes'],
     queryFn: async () => {
-      const response = await fetch('/api/notes');
+      const response = await fetch('/api/notes', {
+        credentials: 'include'  // Include credentials for authentication
+      });
+      if (response.status === 401) {
+        throw new Error('Please login to view your notes');
+      }
       if (!response.ok) {
         throw new Error('Failed to fetch notes');
       }

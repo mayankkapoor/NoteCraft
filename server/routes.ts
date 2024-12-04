@@ -92,9 +92,29 @@ export function registerRoutes(app: Express) {
     }
 
     try {
-      await db.delete(notes).where(eq(notes.id, parseInt(req.params.id)));
+      const noteId = parseInt(req.params.id);
+      if (isNaN(noteId)) {
+        return res.status(400).send("Invalid note ID");
+      }
+
+      // Check if note exists and belongs to user
+      const [existingNote] = await db.select()
+        .from(notes)
+        .where(eq(notes.id, noteId))
+        .limit(1);
+
+      if (!existingNote) {
+        return res.status(404).send("Note not found");
+      }
+
+      if (existingNote.userId !== req.user!.id) {
+        return res.status(403).send("Not authorized to delete this note");
+      }
+
+      await db.delete(notes).where(eq(notes.id, noteId));
       res.status(204).send();
     } catch (error) {
+      console.error('Error deleting note:', error);
       res.status(500).send("Failed to delete note");
     }
   });
